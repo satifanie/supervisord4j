@@ -6,7 +6,7 @@ package com.satikey.tools.supervisord.exceptions;
  * @author Tim Roes
  * @see https://github.com/gturri/aXMLRPC/blob/master/src/main/java/de/timroes/axmlrpc/XMLRPCException.java
  */
-public class XMLRPCException extends Exception {
+public class XMLRPCException extends RuntimeException {
 
     public XMLRPCException() {
         super();

@@ -3,9 +3,7 @@ package com.satikey.tools.supervisord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
@@ -13,6 +11,7 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Map;
 
 /**
  * @author Lei Duan(satifanie@gmail.com) .
@@ -21,7 +20,11 @@ public class Supervisord {
     private final static Logger LOGGER = LoggerFactory.getLogger(Supervisord.class);
 
     private final static String DEFAULT_URL = "http://localhost:9001/RPC2";
-    private String api;
+    private final static String DEFAULT_NAMESPACE = "supervisor";
+    private final static String DOT = ".";
+
+    private String api = DEFAULT_URL;
+    private String namespace = DEFAULT_NAMESPACE;
     private String proxyURL;
     private int proxyPort;
 
@@ -33,7 +36,6 @@ public class Supervisord {
 
     public static Supervisord connect() {
         Supervisord me = new Supervisord();
-        me.api = DEFAULT_URL;
         return me;
 
     }
@@ -42,6 +44,11 @@ public class Supervisord {
         Supervisord me = new Supervisord();
         me.api = apiUrl;
         return me;
+    }
+
+    public Supervisord namespace(String namespace) {
+        this.namespace = namespace;
+        return this;
     }
 
     public Supervisord proxy(String host, int port) {
@@ -62,10 +69,8 @@ public class Supervisord {
      *
      * @return string version version id
      */
-    String getAPIVersion() {
-        String response = new SimpleXMLRPC().call(Constants.SYSTEM_GETAPIVERSION);
-        System.out.println(response);
-        return null;
+    public String getAPIVersion() {
+        return (String) new SimpleXMLRPC().call(buildFullMethodCall(Constants._GET_API_VERSION));
     }
 
     /**
@@ -73,9 +78,8 @@ public class Supervisord {
      *
      * @return string version version id
      */
-    String getSupervisorVersion() {
-        new SimpleXMLRPC().call(Constants.SYSTEM_GETSUPERVISORVERSION);
-        return null;
+    public String getSupervisorVersion() {
+        return (String) new SimpleXMLRPC().call(buildFullMethodCall(Constants._GET_SUPERVISOR_VERSION));
     }
 
     /**
@@ -84,7 +88,7 @@ public class Supervisord {
      * @return string identifier identifying string
      */
     public String getIdentification() {
-        return null;
+        return (String) new SimpleXMLRPC().call(buildFullMethodCall(Constants._GET_IDENTIFICATION));
     }
 
     /**
@@ -92,9 +96,8 @@ public class Supervisord {
      *
      * @return struct A struct with keys int statecode, string statename
      */
-    public String getState() {
-        return null;
-
+    public Map<String, Object> getState() {
+        return (Map<String, Object>) new SimpleXMLRPC().call(buildFullMethodCall(Constants._GET_STATE));
     }
 
     /**
@@ -103,7 +106,7 @@ public class Supervisord {
      * @return int PID
      */
     public int getPID() {
-        return -1;
+        return (Integer) new SimpleXMLRPC().call(buildFullMethodCall(Constants._GET_PID));
     }
 
     /**
@@ -114,7 +117,7 @@ public class Supervisord {
      * @return string result Bytes of log* (#link http://supervisord.org/api.html#supervisor.rpcinterface.SupervisorNamespaceRPCInterface.readLog)
      */
     public String readLog(int offset, int length) {
-        return null;
+        return (String) new SimpleXMLRPC().call(buildFullMethodCall(Constants._READ_LOG), offset, length);
     }
 
     /**
@@ -123,7 +126,7 @@ public class Supervisord {
      * @return boolean result always returns True unless error
      */
     public boolean clearLog() {
-        return true;
+        return (Boolean) new SimpleXMLRPC().call(buildFullMethodCall(Constants._CLEAR_LOG));
     }
 
     /**
@@ -132,7 +135,7 @@ public class Supervisord {
      * @return boolean result always returns True unless error
      */
     public boolean shutdown() {
-        return true;
+        return (Boolean) new SimpleXMLRPC().call(buildFullMethodCall(Constants._SHUTDOWN));
     }
 
     /**
@@ -141,21 +144,9 @@ public class Supervisord {
      * @return boolean result always return True unless error
      */
     public boolean restart() {
-        return false;
+        return (Boolean) new SimpleXMLRPC().call(buildFullMethodCall(Constants._RESTART));
     }
 
-    /////
-    public void listMethods() {
-        System.out.println(new SimpleXMLRPC().call(Constants.SYSTEM_LIST_METHODS));
-    }
-
-    void methodHelp(String method) {
-    }
-
-    void multicall(Object[] calls) {
-    }
-
-    ////
 
     /**
      * Get info about a process named name
@@ -165,7 +156,8 @@ public class Supervisord {
      * @return string {http://supervisord.org/api.html#supervisor.rpcinterface.SupervisorNamespaceRPCInterface.getProcessInfo}
      */
     public String getProcessInfo(String processName) {
-        return null;
+
+        return (String) new SimpleXMLRPC().call(buildFullMethodCall(Constants._GET_PROCESS_INFO), processName);
     }
 
     /**
@@ -173,8 +165,9 @@ public class Supervisord {
      *
      * @return array result An array of process status results
      */
-    public String getAllProcessInfo() {
-        return null;
+    public Object[] getAllProcessInfo() {
+
+        return (Object[]) new SimpleXMLRPC().call(buildFullMethodCall(Constants._GET_ALL_PROCESS_INFO));
     }
 
     /**
@@ -185,7 +178,7 @@ public class Supervisord {
      * @return boolean result Always true unless error
      */
     public boolean startProcess(String processName, boolean waitToStart) {
-        return true;
+        return (Boolean) new SimpleXMLRPC().call(buildFullMethodCall(Constants._START_PROCESS), processName, waitToStart);
     }
 
     /**
@@ -194,7 +187,8 @@ public class Supervisord {
      * @param waitToStart wait Wait for each process to be fully started
      * @return array result An array of process status info structs
      */
-    public void startAllProcesses(boolean waitToStart) {
+    public Boolean startAllProcesses(boolean waitToStart) {
+        return (Boolean) new SimpleXMLRPC().call(buildFullMethodCall(Constants._START_ALL_PROCESSES), waitToStart);
     }
 
     /**
@@ -205,7 +199,7 @@ public class Supervisord {
      * @return array result An array of process status info structs
      */
     public boolean startProcessGroup(String groupName, boolean waitToStart) {
-        return true;
+        return (Boolean) new SimpleXMLRPC().call(buildFullMethodCall(Constants._START_PROCESSES_GROUP), groupName, waitToStart);
     }
 
     /**
@@ -216,7 +210,7 @@ public class Supervisord {
      * @return boolean result Always return True unless error
      */
     public boolean stopProcess(String processName, boolean waitToStop) {
-        return true;
+        return (Boolean) new SimpleXMLRPC().call(buildFullMethodCall(Constants._STOP_PROCESS), processName, waitToStop);
     }
 
     /**
@@ -227,7 +221,7 @@ public class Supervisord {
      * @return array result An array of process status info structs
      */
     public boolean stopProcessGroup(String groupName, boolean waitToStop) {
-        return true;
+        return (Boolean) new SimpleXMLRPC().call(buildFullMethodCall(Constants._STOP_PROCESSES_GROUP), groupName, waitToStop);
     }
 
     /**
@@ -236,8 +230,8 @@ public class Supervisord {
      * @param waitToStop wait Wait for each process to be fully stopped
      * @return array result An array of process status info structs
      */
-    public boolean stopAllProcesses(boolean waitToStop) {
-        return true;
+    public Boolean[] stopAllProcesses(boolean waitToStop) {
+        return (Boolean[]) new SimpleXMLRPC().call(buildFullMethodCall(Constants._STOP_ALL_PROCESSES), waitToStop);
     }
 
     /**
@@ -246,8 +240,8 @@ public class Supervisord {
      * @param processName name Name of the process to signal (or ‘group:name’)
      * @param signal      signal Signal to send, as name (‘HUP’) or number (‘1’)
      */
-    public boolean signalProcess(String processName, String signal) {
-        return true;
+    public boolean signalProcess(String processName, Signal signal) {
+        return (Boolean) new SimpleXMLRPC().call(buildFullMethodCall(Constants._SIGNAL_PROCESS), processName, signal.name());
     }
 
     /**
@@ -257,8 +251,8 @@ public class Supervisord {
      * @param signal    signal Signal to send, as name (‘HUP’) or number (‘1’)
      * @return array
      */
-    public boolean signalProcessGroup(String groupName, String signal) {
-        return true;
+    public Boolean[] signalProcessGroup(String groupName, Signal signal) {
+        return (Boolean[]) new SimpleXMLRPC().call(buildFullMethodCall(Constants._SIGNAL_PROCESSES_GROUP), groupName, signal.name());
     }
 
 
@@ -268,8 +262,8 @@ public class Supervisord {
      * @param signal signal Signal to send, as name (‘HUP’) or number (‘1’)
      * @return array An array of process status info structs
      */
-    public boolean signalAllProcesses(String signal) {
-        return true;
+    public Boolean[] signalAllProcesses(Signal signal) {
+        return (Boolean[]) new SimpleXMLRPC().call(buildFullMethodCall(Constants._SIGNAL_ALL_PROCESSES), signal.name());
     }
 
     /**
@@ -412,6 +406,34 @@ public class Supervisord {
         return true;
     }
 
+    /////
+    public Object[] listMethods() {
+        return (Object[]) new SimpleXMLRPC().call(Constants.SYSTEM_LIST_METHODS);
+    }
+
+    public String methodHelp(String method) {
+        return (String) new SimpleXMLRPC().call(Constants.SYSTEM_METHOD_HELP, method);
+    }
+
+    public Object[] methodSignature(String method) {
+        return (Object[]) new SimpleXMLRPC().call(Constants.SYSTEM_METHOD_SIGNATURE);
+    }
+
+    void multicall(Object[] calls) {
+    }
+
+    ////
+
+    /**
+     * build a full method call with namespace prefix
+     *
+     * @param method method name
+     * @return rpc
+     */
+    private String buildFullMethodCall(final String method) {
+        StringBuilder stringBuilder = new StringBuilder();
+        return stringBuilder.append(namespace).append(DOT).append(method).toString();
+    }
 
     private class SimpleXMLRPC {
         private static final String PARAMS_S = "<params>";
@@ -429,12 +451,14 @@ public class Supervisord {
         private static final String STRING_S = "<string>";
         private static final String STRING_E = "</string>";
 
-        String call(String methodName, Object... args) {
+        Object call(String methodName, Object... args) {
             return post(buildCall(methodName, args));
         }
 
-        private String post(String xml) {
+        private Object post(String xml) {
+            Object result = null;
             StringBuilder response = new StringBuilder();
+            HttpURLConnection connection = null;
             try {
                 URL url = new URL(api);
                 URLConnection uc = null;
@@ -448,12 +472,13 @@ public class Supervisord {
                 }
 
 
-                HttpURLConnection connection = (HttpURLConnection) uc;
+                connection = (HttpURLConnection) uc;
                 connection.setDoOutput(true);
                 connection.setDoInput(true);
                 connection.setRequestMethod("POST");
                 connection.setRequestProperty("User-Agent", "Mozilla/5.0");
                 connection.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+
                 if (username != null) {
                     StringBuilder sb = new StringBuilder();
                     sb.append(username).append(":").append(password);
@@ -470,21 +495,25 @@ public class Supervisord {
                 writer.flush();
                 out.close();
 
-                BufferedReader in = new BufferedReader(
-                        new InputStreamReader(connection.getInputStream()));
-                String inputLine;
-
-                while ((inputLine = in.readLine()) != null) {
-                    response.append(inputLine);
-                }
+//                BufferedReader in = new BufferedReader(
+//                        new InputStreamReader(connection.getInputStream()));
+//                String inputLine;
+//
+//                while ((inputLine = in.readLine()) != null) {
+//                    response.append(inputLine);
+//                }
+//                in.close();
                 //clear
-
-                in.close();
-                connection.disconnect();
+                return new ResponseParser().parse(connection.getInputStream());
             } catch (IOException e) {
                 LOGGER.error("HTTP ERR:{}", e.getMessage(), e.getCause());
+            } finally {
+
+                if (connection != null)
+                    connection.disconnect();
+
             }
-            return response.toString();
+            return null;
         }
 
         /**
