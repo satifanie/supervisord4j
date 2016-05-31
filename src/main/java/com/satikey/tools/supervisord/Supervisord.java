@@ -145,7 +145,7 @@ public class Supervisord {
     }
 
     /////
-    void listMethods() {
+    public void listMethods() {
         System.out.println(new SimpleXMLRPC().call(Constants.SYSTEM_LIST_METHODS));
     }
 
@@ -520,12 +520,5 @@ public class Supervisord {
             sb.append(METHOD_CALL_E);
             return sb.toString();
         }
-    }
-
-    public static void main(String[] args) {
-        Supervisord.connect("http://120.25.121.0:9001/RPC2")
-                .auth("duanlei", "duanlei123")
-                .listMethods();
-
     }
 }
