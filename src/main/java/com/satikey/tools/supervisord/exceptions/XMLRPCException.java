@@ -3,8 +3,7 @@ package com.satikey.tools.supervisord.exceptions;
 /**
  * The exception is thrown whenever the remote procedure call fails in some point.
  *
- * @author Tim Roes
- * @see https://github.com/gturri/aXMLRPC/blob/master/src/main/java/de/timroes/axmlrpc/XMLRPCException.java
+ * @author Tim Roes {#link https://github.com/gturri/aXMLRPC/blob/master/src/main/java/de/timroes/axmlrpc/XMLRPCException.java}
  */
 public class XMLRPCException extends RuntimeException {
 
