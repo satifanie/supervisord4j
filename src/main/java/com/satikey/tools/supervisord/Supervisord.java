@@ -46,6 +46,13 @@ public class Supervisord {
         return me;
     }
 
+    /**
+     * this can be got by the api getIdentification(#link getIdentification()); but to save one http
+     * request, better to set it static
+     *
+     * @param namespace the command prefix: default supervisor.
+     * @see #getIdentification()
+     */
     public Supervisord namespace(String namespace) {
         this.namespace = namespace;
         return this;
@@ -117,6 +124,8 @@ public class Supervisord {
      * @return string result Bytes of log* (#link http://supervisord.org/api.html#supervisor.rpcinterface.SupervisorNamespaceRPCInterface.readLog)
      */
     public String readLog(int offset, int length) {
+        if (offset < 0) offset = 0;
+        if (length < 0) length = 0;
         return (String) new SimpleXMLRPC().call(buildFullMethodCall(Constants._READ_LOG), offset, length);
     }
 
@@ -156,7 +165,6 @@ public class Supervisord {
      * @return string {http://supervisord.org/api.html#supervisor.rpcinterface.SupervisorNamespaceRPCInterface.getProcessInfo}
      */
     public String getProcessInfo(String processName) {
-
         return (String) new SimpleXMLRPC().call(buildFullMethodCall(Constants._GET_PROCESS_INFO), processName);
     }
 
@@ -166,7 +174,6 @@ public class Supervisord {
      * @return array result An array of process status results
      */
     public Object[] getAllProcessInfo() {
-
         return (Object[]) new SimpleXMLRPC().call(buildFullMethodCall(Constants._GET_ALL_PROCESS_INFO));
     }
 
@@ -187,8 +194,8 @@ public class Supervisord {
      * @param waitToStart wait Wait for each process to be fully started
      * @return array result An array of process status info structs
      */
-    public Boolean startAllProcesses(boolean waitToStart) {
-        return (Boolean) new SimpleXMLRPC().call(buildFullMethodCall(Constants._START_ALL_PROCESSES), waitToStart);
+    public Object[] startAllProcesses(boolean waitToStart) {
+        return (Object[]) new SimpleXMLRPC().call(buildFullMethodCall(Constants._START_ALL_PROCESSES), waitToStart);
     }
 
     /**
@@ -230,8 +237,8 @@ public class Supervisord {
      * @param waitToStop wait Wait for each process to be fully stopped
      * @return array result An array of process status info structs
      */
-    public Boolean[] stopAllProcesses(boolean waitToStop) {
-        return (Boolean[]) new SimpleXMLRPC().call(buildFullMethodCall(Constants._STOP_ALL_PROCESSES), waitToStop);
+    public Object[] stopAllProcesses(boolean waitToStop) {
+        return (Object[]) new SimpleXMLRPC().call(buildFullMethodCall(Constants._STOP_ALL_PROCESSES), waitToStop);
     }
 
     /**
@@ -412,7 +419,7 @@ public class Supervisord {
     }
 
     public String methodHelp(String method) {
-        return (String) new SimpleXMLRPC().call(Constants.SYSTEM_METHOD_HELP, method);
+        return (String) new SimpleXMLRPC().call(Constants.SYSTEM_METHOD_HELP, buildFullMethodCall(method));
     }
 
     public Object[] methodSignature(String method) {

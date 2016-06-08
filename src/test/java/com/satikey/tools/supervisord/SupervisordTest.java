@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.FileReader;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -47,7 +48,9 @@ public class SupervisordTest {
      */
     @Test
     public void testGetIdentification() throws Exception {
-//TODO: Test goes here... 
+        LOGGER.info("testing getIdentification(...");
+        String name = supervisord.getIdentification();
+        LOGGER.info("result is {}", name);
     }
 
     /**
@@ -55,22 +58,22 @@ public class SupervisordTest {
      */
     @Test
     public void testGetState() throws Exception {
-//TODO: Test goes here... 
+        LOGGER.info("testing get stat...");
+        Map<String, Object> state = supervisord.getState();
+        for (Map.Entry<String, Object> item : state.entrySet()) {
+            LOGGER.info("{}:{}", item.getKey(), item.getValue());
+        }
     }
 
-    /**
-     * Method: getPID()
-     */
-    @Test
-    public void testGetPID() throws Exception {
-    }
 
     /**
      * Method: readLog(int offset, int length)
      */
     @Test
     public void testReadLog() throws Exception {
-//TODO: Test goes here... 
+        LOGGER.info("testing read Log....");
+        String logs = supervisord.readLog(0, -1);
+        LOGGER.info("server log is :{} ", logs);
     }
 
     /**
@@ -78,7 +81,10 @@ public class SupervisordTest {
      */
     @Test
     public void testClearLog() throws Exception {
-//TODO: Test goes here... 
+        LOGGER.info("testing clear log...");
+        boolean result = supervisord.clearLog();
+        LOGGER.info("clear log result:{}", result);
+
     }
 
     /**
@@ -86,7 +92,9 @@ public class SupervisordTest {
      */
     @Test
     public void testShutdown() throws Exception {
-//TODO: Test goes here... 
+        LOGGER.info("testing shutdown");
+        boolean result = supervisord.shutdown();
+        LOGGER.info("shutdown result:{}", result);
     }
 
     /**
@@ -94,7 +102,9 @@ public class SupervisordTest {
      */
     @Test
     public void testRestart() throws Exception {
-//TODO: Test goes here... 
+        LOGGER.info("testing restart");
+        Boolean result = supervisord.restart();
+        LOGGER.info("restart result:{}", result);
     }
 
 
@@ -103,7 +113,9 @@ public class SupervisordTest {
      */
     @Test
     public void testMethodHelp() throws Exception {
-//TODO: Test goes here... 
+        LOGGER.info("testing methodHelp");
+        String result = supervisord.methodHelp(Constants._SIGNAL_ALL_PROCESSES);
+        LOGGER.info("restart methodHelp result:{}", result);
     }
 
     /**
@@ -135,7 +147,9 @@ public class SupervisordTest {
      */
     @Test
     public void testStartProcess() throws Exception {
-//TODO: Test goes here... 
+        LOGGER.info("start process");
+        boolean result = supervisord.startProcess("cat1", false);
+        LOGGER.info("result:{}", result);
     }
 
     /**
@@ -143,7 +157,9 @@ public class SupervisordTest {
      */
     @Test
     public void testStartAllProcesses() throws Exception {
-//TODO: Test goes here... 
+        LOGGER.info("testing start all process.");
+        Object result = supervisord.startAllProcesses(true);
+        LOGGER.info("starting all process result:{}", result);
     }
 
     /**
@@ -159,7 +175,9 @@ public class SupervisordTest {
      */
     @Test
     public void testStopProcess() throws Exception {
-//TODO: Test goes here... 
+        LOGGER.info("stop process");
+        boolean result = supervisord.stopProcess("cat1", false);
+        LOGGER.info("result:{}", result);
     }
 
     /**
@@ -175,7 +193,9 @@ public class SupervisordTest {
      */
     @Test
     public void testStopAllProcesses() throws Exception {
-//TODO: Test goes here... 
+        LOGGER.info("test stop all process.");
+        Object[] result = supervisord.stopAllProcesses(true);
+        LOGGER.info("result:{}", result);
     }
 
     /**
@@ -337,6 +357,17 @@ try {
 
 
     /**
+     * Method: getPID()
+     */
+    @Test
+    public void testGetPID() throws Exception {
+        LOGGER.info("testing get the supervisord pid...");
+        int pid = supervisord.getPID();
+        LOGGER.info("pid is {}, checking it manual", pid);
+    }
+
+
+    /**
      * Method: getAPIVersion()
      */
     @Test
@@ -359,7 +390,7 @@ try {
     /**
      * Method: listMethods()
      */
-    @Test
+//    @Test
     public void testListMethods() throws Exception {
         LOGGER.info("testing listMethods:");
         Object[] datas = supervisord.listMethods();
