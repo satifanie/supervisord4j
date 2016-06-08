@@ -1,4 +1,4 @@
-**Supervisord4j **
+* Supervisord4j *
 =====================
 
  This is a simple java client for Supervisor’s XML-RPC API.
@@ -79,5 +79,5 @@ Happy supervisord.
 
 #Thanks to
 ----------
-[gturri](https://github.com/gturri/aXMLRPC) - the XML RPC call was based on his job.
-[Android Open Source Project](https://developer.android.com/reference/android/util/Base64.html) - the base64 tools was import from his.
+-[gturri](https://github.com/gturri/aXMLRPC) - the XML RPC call was based on his job.
+-[Android Open Source Project](https://developer.android.com/reference/android/util/Base64.html) - the base64 tools was import from his.
