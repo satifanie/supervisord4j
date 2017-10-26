@@ -1,15 +1,15 @@
 /**
  * Copyright (c) 2011-2012 Tim Roes
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
  * associated documentation files (the "Software"), to deal in the Software without restriction,
  * including without limitation the rights to use, copy, modify, merge, publish, distribute,
  * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all copies or
  * substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
  * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
  * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
@@ -18,6 +18,7 @@
  */
 package com.satikey.tools.supervisord;
 
+import com.satikey.tools.supervisord.exceptions.SupervisordException;
 import com.satikey.tools.supervisord.exceptions.XMLRPCException;
 
 import org.w3c.dom.Document;
@@ -66,8 +67,8 @@ class ResponseParser {
     private static final String METHOD_NAME = "methodName";
     private static final String STRUCT_MEMBER = "member";
 
-
-    Object parse(InputStream xmlin) throws XMLRPCException {
+    Object parse(InputStream xmlin)
+            throws XMLRPCException, SupervisordException {
         try {
 
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -76,7 +77,6 @@ class ResponseParser {
             Document dom = builder.parse(xmlin);
 
             Element e = dom.getDocumentElement();
-
 
             // Check for root tag
             if (!e.getNodeName().equals(METHOD_RESPONSE)) {
@@ -97,7 +97,8 @@ class ResponseParser {
 
                 @SuppressWarnings("unchecked")
                 Map<String, Object> o = (Map<String, Object>) getReturnValueFromElement(e);
-                throw new XMLRPCException((String) o.get(FAULT_STRING) + ":" + (Integer) o.get(FAULT_CODE));
+                Integer faultCode = (Integer) o.get(FAULT_CODE);
+                throw SupervisordException.create(SupervisordException.Code.get(faultCode));
 
             }
 
@@ -105,12 +106,15 @@ class ResponseParser {
 
         } catch (XMLRPCException ex) {
             throw ex;
+        } catch (SupervisordException sdex) {
+            throw sdex;
         } catch (Exception ex) {
             throw new XMLRPCException("Error getting result from server.", ex);
         }
     }
 
-    public static void printDocument(Document doc, OutputStream out) throws IOException, TransformerException {
+    public static void printDocument(Document doc, OutputStream out)
+            throws IOException, TransformerException {
         TransformerFactory tf = TransformerFactory.newInstance();
         Transformer transformer = tf.newTransformer();
         transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
@@ -120,7 +124,7 @@ class ResponseParser {
         transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
 
         transformer.transform(new DOMSource(doc),
-                new StreamResult(new OutputStreamWriter(out, "UTF-8")));
+                              new StreamResult(new OutputStreamWriter(out, "UTF-8")));
     }
 
     /**
@@ -157,7 +161,8 @@ class ResponseParser {
         }
     }
 
-    private String extractString(Element content) throws XMLRPCException {
+    private String extractString(Element content)
+            throws XMLRPCException {
         String text = getOnlyTextContent(content.getChildNodes());
         text = text.replaceAll("&lt;", "<").replaceAll("&amp;", "&");
         return text;
@@ -215,7 +220,8 @@ class ResponseParser {
                     } else {
                         s = getOnlyTextContent(m.getChildNodes());
                     }
-                } else if (m.getNodeType() == Node.ELEMENT_NODE && STRUCT_VALUE.equals(m.getNodeName())) {
+                } else if (m.getNodeType() == Node.ELEMENT_NODE &&
+                        STRUCT_VALUE.equals(m.getNodeName())) {
                     if (o != null) {
                         throw new XMLRPCException("Value of a struct member cannot be set twice.");
                     } else {
@@ -278,7 +284,8 @@ class ResponseParser {
      * @throws XMLRPCException Will be thrown if there is more then one child element except empty
      *                         text nodes.
      */
-    private static Element getOnlyChildElement(NodeList list) throws XMLRPCException {
+    private static Element getOnlyChildElement(NodeList list)
+            throws XMLRPCException {
 
         Element e = null;
         Node n;
@@ -317,7 +324,8 @@ class ResponseParser {
      * @throws XMLRPCException Will be thrown if there is more than just one text node within the
      *                         list.
      */
-    private static String getOnlyTextContent(NodeList list) throws XMLRPCException {
+    private static String getOnlyTextContent(NodeList list)
+            throws XMLRPCException {
 
         StringBuilder builder = new StringBuilder();
         Node n;
