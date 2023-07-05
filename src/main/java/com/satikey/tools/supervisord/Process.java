@@ -20,7 +20,7 @@ import java.io.Serializable;
 
 /**
  * @author Lei Duan(satifanie@gmail.com) .
- * @see http://supervisord.org/api.html#supervisor.rpcinterface.SupervisorNamespaceRPCInterface.getProcessInfo
+ * see http://supervisord.org/api.html#supervisor.rpcinterface.SupervisorNamespaceRPCInterface.getProcessInfo
  */
 public class Process implements Serializable {
     private static final long serialVersionUID = -3585545987673007624L;
